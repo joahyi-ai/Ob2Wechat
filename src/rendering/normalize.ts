@@ -1,5 +1,7 @@
 import type { SourceHints } from "./source";
 
+const ARTICLE_TITLE_ATTRIBUTE = "data-ob2wechat-article-title";
+
 const REMOVE_SELECTORS = [
   ".frontmatter",
   ".frontmatter-container",
@@ -27,7 +29,21 @@ export function annotateGeneratedContent(root: HTMLElement, hints: SourceHints):
   });
 }
 
-export function normalizeRenderedDocument(root: HTMLElement, hints: SourceHints): HTMLElement {
+export function markArticleTitle(root: HTMLElement, title: string): boolean {
+  const firstHeading = root.querySelector<HTMLElement>("h1");
+  if (!firstHeading || firstHeading.textContent?.trim() !== title.trim()) return false;
+  firstHeading.setAttribute(ARTICLE_TITLE_ATTRIBUTE, "true");
+  return true;
+}
+
+export function removeArticleTitle(root: HTMLElement): boolean {
+  const title = root.querySelector<HTMLElement>(`[${ARTICLE_TITLE_ATTRIBUTE}="true"]`);
+  if (!title) return false;
+  title.remove();
+  return true;
+}
+
+export function normalizeRenderedDocument(root: HTMLElement, hints: SourceHints, title: string): HTMLElement {
   REMOVE_SELECTORS.forEach((selector) => {
     root.querySelectorAll(selector).forEach((element) => element.remove());
   });
@@ -47,5 +63,6 @@ export function normalizeRenderedDocument(root: HTMLElement, hints: SourceHints)
   });
 
   annotateGeneratedContent(root, hints);
+  markArticleTitle(root, title);
   return root;
 }

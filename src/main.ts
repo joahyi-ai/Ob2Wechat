@@ -41,7 +41,7 @@ export default class Ob2WechatPlugin extends Plugin {
 
     this.addCommand({
       id: "copy-current-note-to-wechat",
-      name: "复制当前整篇笔记到公众号",
+      name: "复制当前笔记正文到公众号",
       checkCallback: (checking) => {
         const available = this.getSourceSnapshot() !== null;
         if (!checking && available) void this.copyViaPreview();

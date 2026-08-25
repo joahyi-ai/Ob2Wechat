@@ -1,7 +1,7 @@
 {
   "id": "ob2wechat",
   "name": "Ob2Wechat",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "minAppVersion": "1.6.0",
   "description": "Preview the active Markdown note with WeChat-compatible styling and copy it as rich text.",
   "author": "joahyi-ai",

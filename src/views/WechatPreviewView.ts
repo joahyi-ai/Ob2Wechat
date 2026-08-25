@@ -114,10 +114,10 @@ export class WechatPreviewView extends ItemView {
 
     this.copyButtonEl = this.toolbarEl.createEl("button", {
       cls: "mod-cta ob2wechat-copy-button",
-      text: "复制到公众号",
+      text: "复制正文",
       attr: {
         type: "button",
-        "aria-label": "复制当前整篇笔记到公众号",
+        "aria-label": "复制当前笔记正文到公众号",
       },
     });
     this.registerDomEvent(this.copyButtonEl, "click", () => void this.copyArticle());
@@ -198,7 +198,7 @@ export class WechatPreviewView extends ItemView {
   private setBusy(busy: boolean): void {
     this.busy = busy;
     this.copyButtonEl.disabled = busy || !this.currentArticle;
-    this.copyButtonEl.setText(busy ? "正在处理图片…" : "复制到公众号");
+    this.copyButtonEl.setText(busy ? "正在处理图片…" : "复制正文");
     this.copyButtonEl.setAttribute("aria-busy", String(busy));
   }
 
@@ -239,7 +239,8 @@ export class WechatPreviewView extends ItemView {
         const imageSummary = payload.embeddedImageCount > 0
           ? `，已内嵌 ${payload.embeddedImageCount} 张图片`
           : "";
-        new Notice(`已复制到剪贴板${imageSummary}，可前往公众号后台粘贴`);
+        const titleSummary = payload.titleRemoved ? "，已移除文章标题" : "";
+        new Notice(`正文已复制到剪贴板${titleSummary}${imageSummary}，可前往公众号后台粘贴`);
       } else {
         new Notice(`已复制，但有 ${payload.warnings.length} 项未完全处理`);
       }

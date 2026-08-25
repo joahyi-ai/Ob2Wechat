@@ -10,7 +10,7 @@ Ob2Wechat 是一个桌面端 Obsidian 插件：在右侧边栏实时预览当前
 - 支持标题、段落、强调、链接、列表、任务列表、引用、代码块和表格。
 - 支持 Obsidian 本地图片、相对路径图片和网络图片。
 - 支持 Callout、脚注、数学公式和 Mermaid。
-- 点击复制时才在内存中将图片、公式和 Mermaid 转为可粘贴图片；不会把 Base64 写回 Markdown。
+- 点击“复制正文”时先移除文件名对应的文章标题，再在内存中将图片、公式和 Mermaid 转为可粘贴图片；不会把 Base64 写回 Markdown。
 - 同时写入 `text/html` 与 `text/plain` 剪贴板格式。
 - 不需要公众号 AppID/AppSecret，不会自动提交公众号草稿。
 

@@ -3,6 +3,7 @@ import { makeWechatCompatible } from "../compatibility/wechatCompat";
 import { sanitizeArticle } from "../compatibility/sanitizeHtml";
 import { embedGeneratedMedia } from "../media/embedGeneratedMedia";
 import { embedArticleImages, type ConversionWarning } from "../media/embedImages";
+import { removeArticleTitle } from "../rendering/normalize";
 import { applyWechatTheme } from "../theme/wechatTheme";
 
 export interface CopyPayload {
@@ -10,6 +11,7 @@ export interface CopyPayload {
   text: string;
   warnings: ConversionWarning[];
   embeddedImageCount: number;
+  titleRemoved: boolean;
 }
 
 export async function createCopyPayload(
@@ -18,6 +20,7 @@ export async function createCopyPayload(
   sourcePath: string,
 ): Promise<CopyPayload> {
   const article = renderedArticle.cloneNode(true) as HTMLElement;
+  const titleRemoved = removeArticleTitle(article);
   const generatedWarnings = await embedGeneratedMedia(article);
   const imageWarnings = await embedArticleImages(app, article, sourcePath);
   applyWechatTheme(article);
@@ -31,6 +34,7 @@ export async function createCopyPayload(
     text: article.innerText,
     warnings: [...generatedWarnings, ...imageWarnings],
     embeddedImageCount,
+    titleRemoved,
   };
 }
 

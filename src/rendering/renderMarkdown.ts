@@ -40,7 +40,7 @@ export class PreviewRenderer {
       article.className = "ob2wechat-article";
       article.replaceChildren(...Array.from(staging.childNodes).map((node) => node.cloneNode(true)));
 
-      normalizeRenderedDocument(article, prepared.hints);
+      normalizeRenderedDocument(article, prepared.hints, prepared.title);
       applyWechatTheme(article);
 
       return {
