@@ -39,7 +39,7 @@ async function loadImage(source: string): Promise<HTMLImageElement> {
 
 function drawImageToPng(image: HTMLImageElement, width: number, height: number, scale = 2): string {
   const fittedScale = Math.min(scale, MAX_DIMENSION / Math.max(width, height));
-  const canvas = document.createElement("canvas");
+  const canvas = createEl("canvas");
   canvas.width = Math.max(1, Math.round(width * fittedScale));
   canvas.height = Math.max(1, Math.round(height * fittedScale));
   const context = canvas.getContext("2d");
@@ -73,7 +73,7 @@ function replaceForeignObjects(svg: SVGSVGElement): void {
     const y = numericAttribute(foreignObject, "y");
     const width = numericAttribute(foreignObject, "width");
     const height = numericAttribute(foreignObject, "height");
-    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    const text = createSvg("text");
     text.textContent = label;
     text.setAttribute("x", String(x + width / 2));
     text.setAttribute("y", String(y + height / 2));
@@ -92,8 +92,10 @@ export async function rasterizeSvgElement(svg: SVGSVGElement, scale = 2): Promis
   clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
   clone.setAttribute("width", String(width));
   clone.setAttribute("height", String(height));
-  clone.style.color = getComputedStyle(svg).color || "#333333";
-  clone.style.backgroundColor = "transparent";
+  clone.setCssStyles({
+    color: getComputedStyle(svg).color || "#333333",
+    backgroundColor: "transparent",
+  });
 
   replaceForeignObjects(clone);
 
@@ -145,12 +147,12 @@ export function rasterizeMathText(source: string, block: boolean): string {
   const fontSize = block ? 22 : 17;
   const horizontalPadding = block ? 20 : 6;
   const verticalPadding = block ? 14 : 4;
-  const probe = document.createElement("canvas").getContext("2d");
+  const probe = createEl("canvas").getContext("2d");
   if (!probe) throw new Error("Canvas is unavailable");
   probe.font = `${fontSize}px Georgia, Times New Roman, serif`;
   const width = Math.min(DEFAULT_WIDTH, Math.max(24, Math.ceil(probe.measureText(text).width) + horizontalPadding * 2));
   const height = fontSize + verticalPadding * 2;
-  const canvas = document.createElement("canvas");
+  const canvas = createEl("canvas");
   canvas.width = width * scale;
   canvas.height = height * scale;
   const context = canvas.getContext("2d");

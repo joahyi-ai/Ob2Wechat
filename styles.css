@@ -1,3 +1,15 @@
+.ob2wechat-render-staging {
+  position: fixed;
+  left: -100000px;
+  top: 0;
+  width: 480px;
+  min-height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -2147483648;
+  contain: layout style paint;
+}
+
 .ob2wechat-view {
   --ob2wechat-green: #07c160;
   --ob2wechat-green-soft: rgba(7, 193, 96, 0.1);
@@ -6,7 +18,7 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  padding: 0 !important;
+  padding: 0;
   background: var(--background-secondary);
 }
 
@@ -45,11 +57,11 @@
   white-space: nowrap;
 }
 
-.ob2wechat-copy-button {
+.ob2wechat-toolbar .ob2wechat-copy-button.mod-cta {
   flex: 0 0 auto;
   min-width: 116px;
   white-space: nowrap;
-  background-color: var(--ob2wechat-green) !important;
+  background-color: var(--ob2wechat-green);
 }
 
 .ob2wechat-copy-button:disabled {

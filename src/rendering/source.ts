@@ -34,7 +34,7 @@ export function firstMarkdownHeading(markdown: string): string | null {
 }
 
 function escapeHeading(title: string): string {
-  return title.replace(/([\\`*_{}\[\]<>])/g, "\\$1");
+  return title.replace(/([\\`*_{}[\]<>])/g, "\\$1");
 }
 
 function sourceBody(markdown: string): { body: string; startOffset: number } {

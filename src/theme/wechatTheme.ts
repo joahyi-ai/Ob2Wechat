@@ -93,7 +93,7 @@ function styleFootnotes(root: HTMLElement): void {
 }
 
 export function applyWechatTheme(root: HTMLElement): HTMLElement {
-  root.setAttribute("style", WECHAT_CONTAINER_STYLE);
+  appendStyle(root, WECHAT_CONTAINER_STYLE);
   root.setAttribute("data-ob2wechat-article", "true");
 
   Object.entries(ELEMENT_STYLES).forEach(([selector, cssText]) => {
@@ -101,7 +101,7 @@ export function applyWechatTheme(root: HTMLElement): HTMLElement {
   });
 
   root.querySelectorAll<HTMLElement>("pre code").forEach((code) => {
-    code.setAttribute("style", "display:block;padding:0;background:transparent;color:#24292f;border-radius:0;font-size:inherit;line-height:inherit;white-space:pre;word-break:normal;overflow-wrap:normal;font-family:inherit");
+    appendStyle(code, "display:block;padding:0;background:transparent;color:#24292f;border-radius:0;font-size:inherit;line-height:inherit;white-space:pre;word-break:normal;overflow-wrap:normal;font-family:inherit");
   });
 
   Object.entries(TOKEN_STYLES).forEach(([selector, cssText]) => {

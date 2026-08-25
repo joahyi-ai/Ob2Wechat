@@ -2,7 +2,7 @@ import type { ConversionWarning } from "./embedImages";
 import { rasterizeMathText, rasterizeSvgElement } from "./rasterizeSvg";
 
 function imageElement(source: string, alt: string, style: string): HTMLImageElement {
-  const image = document.createElement("img");
+  const image = createEl("img");
   image.src = source;
   image.alt = alt;
   image.setAttribute("style", style);
@@ -10,7 +10,7 @@ function imageElement(source: string, alt: string, style: string): HTMLImageElem
 }
 
 function fallbackCode(source: string, block: boolean): HTMLElement {
-  const element = document.createElement(block ? "pre" : "code");
+  const element = createEl(block ? "pre" : "code");
   element.textContent = block ? source : `$${source}$`;
   element.setAttribute(
     "style",

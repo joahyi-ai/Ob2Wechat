@@ -1,8 +1,26 @@
-# Ob2Wechat
+# WeChat Publish Preview
 
 在 Obsidian 侧边栏实时预览 Markdown 的微信公众号排版，并一键复制可直接粘贴到公众号编辑器的富文本正文。
 
-Ob2Wechat 面向习惯在 Obsidian 中写作、最后发布到微信公众号的用户。插件保持 Markdown 原文简洁：预览和复制所需的图片转换都在内存中完成，不会把 Base64 写回笔记。
+WeChat Publish Preview 面向习惯在 Obsidian 中写作、最后发布到微信公众号的用户。插件保持 Markdown 原文简洁：预览和复制所需的图片转换都在内存中完成，不会把 Base64 写回笔记。
+
+## English
+
+WeChat Publish Preview is a desktop plugin for writers who draft Markdown notes in Obsidian and publish them through the WeChat Official Account editor. It opens a live preview in the right sidebar, keeps the editor and preview aligned while scrolling, and copies the article body as rich HTML that can be pasted directly into WeChat.
+
+The plugin supports headings, paragraphs, emphasis, links, lists, task lists, blockquotes, code blocks, tables, footnotes, callouts, local images, remote images, math, and Mermaid diagrams. Local and remote images are converted only in the in-memory copy payload. Base64 data is never written back to the Markdown file.
+
+### English quick start
+
+1. Open a Markdown note.
+2. Run **Open WeChat preview** from the command palette or use the ribbon icon.
+3. Edit and scroll normally; the sidebar preview updates and follows the source position.
+4. Click **Copy article body**.
+5. Paste the result into the body field of the WeChat Official Account editor and enter the title separately.
+
+After the community-directory review is complete, install the plugin from **Settings → Community plugins → Browse** by searching for `WeChat Publish Preview`. Until then, install it with BRAT using `joahyi-ai/Ob2Wechat`, or download `main.js`, `manifest.json`, and `styles.css` from the latest GitHub release and place them in `.obsidian/plugins/wechat-publish-preview/`.
+
+WeChat Publish Preview does not collect telemetry, use a custom server, read WeChat account credentials, or submit drafts automatically. Network requests are made only when an article references a remote image. Clipboard access occurs only when the user explicitly requests a copy.
 
 ## 功能亮点
 
@@ -48,7 +66,7 @@ Ob2Wechat 面向习惯在 Obsidian 中写作、最后发布到微信公众号的
 
 1. 打开“设置” → “社区插件”。
 2. 启用社区插件，然后点击“浏览”。
-3. 搜索 `Ob2Wechat`。
+3. 搜索 `WeChat Publish Preview`。
 4. 点击“安装”，安装完成后点击“启用”。
 
 > 首次上架正在准备/审核期间，请使用下面的 BRAT 或手动安装方式。
@@ -60,7 +78,7 @@ Ob2Wechat 面向习惯在 Obsidian 中写作、最后发布到微信公众号的
 1. 从 Obsidian 社区插件市场安装并启用 [BRAT](https://github.com/TfTHacker/obsidian42-brat)。
 2. 打开命令面板，运行 `BRAT: Add a beta plugin for testing`。
 3. 输入仓库地址：`joahyi-ai/Ob2Wechat`。
-4. 完成安装后，在“设置” → “社区插件”中启用 Ob2Wechat。
+4. 完成安装后，在“设置” → “社区插件”中启用 WeChat Publish Preview。
 
 ### 方式三：从 GitHub Release 手动安装
 
@@ -84,17 +102,17 @@ Ob2Wechat 面向习惯在 Obsidian 中写作、最后发布到微信公众号的
    ```
 
 4. 重启 Obsidian，或重新加载应用。
-5. 打开“设置” → “社区插件”，启用 Ob2Wechat。
+5. 打开“设置” → “社区插件”，启用 WeChat Publish Preview。
 
 ## 兼容性
 
-- Obsidian `1.6.0` 或更高版本。
+- Obsidian `1.7.2` 或更高版本。
 - 仅支持桌面端 Obsidian。
 - 微信公众号编辑器可能继续清理部分 HTML 或 CSS；正式发布前建议在后台预览一次。
 
 ## 隐私与网络访问
 
-Ob2Wechat 不收集遥测，不使用自有服务器，也不会自动上传笔记。
+WeChat Publish Preview 不收集遥测，不使用自有服务器，也不会自动上传笔记。
 
 - 笔记内容：仅在本机 Obsidian 中读取和渲染。
 - 本地文件：仅在处理当前笔记引用的本地图片时读取 Vault 内资源。
@@ -110,7 +128,7 @@ Ob2Wechat 不收集遥测，不使用自有服务器，也不会自动上传笔�
 
 ### 为什么复制后没有自动填写公众号标题？
 
-网页剪贴板只能把内容粘贴到当前获得焦点的编辑区域，无法同时把标题和正文分发到两个独立输入框。因此 Ob2Wechat 默认只复制正文，标题需要手动填写。
+网页剪贴板只能把内容粘贴到当前获得焦点的编辑区域，无法同时把标题和正文分发到两个独立输入框。因此 WeChat Publish Preview 默认只复制正文，标题需要手动填写。
 
 ### Base64 会写进 Markdown 吗？
 

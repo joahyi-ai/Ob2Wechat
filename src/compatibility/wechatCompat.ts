@@ -1,5 +1,5 @@
-function replaceElementTag(element: HTMLElement, tagName: string): HTMLElement {
-  const replacement = document.createElement(tagName);
+function replaceElementTag(element: HTMLElement, tagName: keyof HTMLElementTagNameMap): HTMLElement {
+  const replacement = createEl(tagName);
   for (const attribute of Array.from(element.attributes)) {
     replacement.setAttribute(attribute.name, attribute.value);
   }
@@ -10,9 +10,15 @@ function replaceElementTag(element: HTMLElement, tagName: string): HTMLElement {
 
 function staticizeTasks(root: HTMLElement): void {
   root.querySelectorAll<HTMLInputElement>('input[type="checkbox"]').forEach((checkbox) => {
-    const marker = document.createElement("span");
+    const marker = createSpan();
     marker.textContent = checkbox.checked ? "☑" : "☐";
-    marker.setAttribute("style", "display:inline-block;margin-right:8px;color:#07c160;font-size:1em;vertical-align:baseline");
+    marker.setCssStyles({
+      display: "inline-block",
+      marginRight: "8px",
+      color: "#07c160",
+      fontSize: "1em",
+      verticalAlign: "baseline",
+    });
     checkbox.replaceWith(marker);
   });
 }
@@ -43,9 +49,9 @@ function distributeContainerStyles(root: HTMLElement): void {
   const family = "-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,\"Helvetica Neue\",Arial,\"PingFang SC\",\"Microsoft YaHei\",sans-serif";
   root.querySelectorAll<HTMLElement>("p,li,h1,h2,h3,h4,h5,h6,blockquote,td,th,span").forEach((element) => {
     if (element.closest("pre,code")) return;
-    if (!element.style.fontFamily) element.style.fontFamily = family;
+    if (!element.style.fontFamily) element.setCssStyles({ fontFamily: family });
     if (!element.style.lineHeight && ["P", "LI", "BLOCKQUOTE", "TD", "TH"].includes(element.tagName)) {
-      element.style.lineHeight = "1.7";
+      element.setCssStyles({ lineHeight: "1.7" });
     }
   });
 }

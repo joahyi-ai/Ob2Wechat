@@ -10,4 +10,4 @@ await Promise.all(
   ),
 );
 
-console.log(`Deployed Ob2Wechat to ${pluginDir}`);
+console.log(`Deployed WeChat Publish Preview to ${pluginDir}`);

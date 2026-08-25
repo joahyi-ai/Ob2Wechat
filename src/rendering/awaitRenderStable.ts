@@ -1,4 +1,4 @@
-const nextFrame = (): Promise<void> => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+const nextFrame = (): Promise<void> => new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
 
 async function waitForDomQuiet(root: HTMLElement, quietMs = 120, timeoutMs = 3000): Promise<void> {
   await new Promise<void>((resolve) => {

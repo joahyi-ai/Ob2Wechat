@@ -24,7 +24,13 @@ export function normalizeImageMime(contentType: string | undefined, path: string
 export async function blobToDataUrl(blob: Blob): Promise<string> {
   return await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        reject(new Error("Unable to encode image as a data URL"));
+      }
+    };
     reader.onerror = () => reject(reader.error ?? new Error("Unable to encode image"));
     reader.readAsDataURL(blob);
   });

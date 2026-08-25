@@ -20,13 +20,9 @@ export interface RenderedArticle {
 const SCROLL_ANCHOR_SELECTOR = "[data-ob2wechat-source-offset]";
 
 function createStagingElement(): HTMLElement {
-  const staging = document.createElement("div");
+  const staging = createDiv();
   staging.className = "markdown-rendered ob2wechat-render-staging";
   staging.setAttribute("aria-hidden", "true");
-  staging.setAttribute(
-    "style",
-    "position:fixed;left:-100000px;top:0;width:480px;min-height:1px;opacity:0;pointer-events:none;z-index:-2147483648;contain:layout style paint",
-  );
   document.body.appendChild(staging);
   return staging;
 }
@@ -96,7 +92,7 @@ export class PreviewRenderer {
       await MarkdownRenderer.render(this.app, prepared.renderMarkdown, staging, file.path, component);
       await awaitRenderStable(staging);
 
-      const article = document.createElement("section");
+      const article = createEl("section");
       article.className = "ob2wechat-article";
       article.replaceChildren(...Array.from(staging.childNodes).map((node) => node.cloneNode(true)));
 

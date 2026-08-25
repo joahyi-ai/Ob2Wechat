@@ -116,7 +116,6 @@ export default class Ob2WechatPlugin extends Plugin {
 
   onunload(): void {
     this.detachSourceScroller();
-    this.app.workspace.detachLeavesOfType(VIEW_TYPE_WECHAT_PREVIEW);
   }
 
   getSourceSnapshot(): SourceSnapshot | null {

@@ -5,7 +5,7 @@ const production = process.argv[2] === "production";
 
 const context = await esbuild.context({
   banner: {
-    js: "/* Ob2Wechat - MIT License. See LICENSE and THIRD_PARTY_NOTICES.md. */",
+    js: "/* WeChat Publish Preview - MIT License. See LICENSE and THIRD_PARTY_NOTICES.md. */",
   },
   entryPoints: ["src/main.ts"],
   bundle: true,
