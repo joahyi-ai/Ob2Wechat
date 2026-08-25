@@ -2,6 +2,7 @@ import { ItemView, Notice, WorkspaceLeaf } from "obsidian";
 import { createCopyPayload, writeCopyPayload } from "../clipboard/copyArticle";
 import type { ConversionWarning } from "../media/embedImages";
 import { PreviewRenderer, type RenderedArticle } from "../rendering/renderMarkdown";
+import { scrollTopForProgress } from "../scroll/scrollSync";
 import type Ob2WechatPlugin from "../main";
 
 export const VIEW_TYPE_WECHAT_PREVIEW = "ob2wechat-preview";
@@ -20,6 +21,9 @@ export class WechatPreviewView extends ItemView {
   private requestedRevision = 0;
   private currentArticle: RenderedArticle | null = null;
   private busy = false;
+  private editorScrollProgress = 0;
+  private scrollSyncFrame: number | null = null;
+  private previewResizeObserver: ResizeObserver | null = null;
 
   constructor(
     leaf: WorkspaceLeaf,
@@ -43,6 +47,8 @@ export class WechatPreviewView extends ItemView {
 
   async onOpen(): Promise<void> {
     this.buildInterface();
+    this.previewResizeObserver = new ResizeObserver(() => this.scheduleScrollSync());
+    this.previewResizeObserver.observe(this.previewScrollerEl);
     this.scheduleRefresh(true);
   }
 
@@ -51,8 +57,31 @@ export class WechatPreviewView extends ItemView {
       window.clearTimeout(this.refreshTimer);
       this.refreshTimer = null;
     }
+    if (this.scrollSyncFrame !== null) {
+      window.cancelAnimationFrame(this.scrollSyncFrame);
+      this.scrollSyncFrame = null;
+    }
+    this.previewResizeObserver?.disconnect();
+    this.previewResizeObserver = null;
     this.requestedRevision += 1;
     this.currentArticle = null;
+  }
+
+  syncScrollFromEditor(progress: number): void {
+    this.editorScrollProgress = progress;
+    this.scheduleScrollSync();
+  }
+
+  private scheduleScrollSync(): void {
+    if (!this.previewScrollerEl || this.scrollSyncFrame !== null) return;
+    this.scrollSyncFrame = window.requestAnimationFrame(() => {
+      this.scrollSyncFrame = null;
+      this.previewScrollerEl.scrollTop = scrollTopForProgress(
+        this.editorScrollProgress,
+        this.previewScrollerEl.scrollHeight,
+        this.previewScrollerEl.clientHeight,
+      );
+    });
   }
 
   scheduleRefresh(immediate = false): void {
@@ -135,6 +164,7 @@ export class WechatPreviewView extends ItemView {
     this.setStatus("预览已同步", "ready");
     this.warningEl.hide();
     this.copyButtonEl.disabled = false;
+    this.scheduleScrollSync();
   }
 
   private showEmptyState(message: string): void {
@@ -143,6 +173,8 @@ export class WechatPreviewView extends ItemView {
     this.setStatus("", "idle");
     this.warningEl.hide();
     this.copyButtonEl.disabled = true;
+    this.editorScrollProgress = 0;
+    this.previewScrollerEl.scrollTop = 0;
   }
 
   private showRenderError(error: unknown): void {
