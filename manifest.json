@@ -3,7 +3,7 @@
   "name": "WeChat Publish Preview",
   "version": "1.0.1",
   "minAppVersion": "1.7.2",
-  "description": "Preview Markdown with WeChat-compatible styling and copy rich text to the WeChat editor.",
+  "description": "Preview Obsidian Markdown with WeChat-ready styling, synchronized scrolling, and one-click rich-text copy.",
   "author": "joahyi-ai",
   "isDesktopOnly": true
 }
