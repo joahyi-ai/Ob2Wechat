@@ -10,6 +10,10 @@ WeChat Publish Preview 是一款面向公众号写作者的 Obsidian 桌面端�
 
 ![WeChat Publish Preview 在 Obsidian 中实时预览公众号排版](images/wechat-publish-preview.png)
 
+## English summary
+
+WeChat Publish Preview provides a live, WeChat-ready Markdown preview in the right sidebar, synchronized scrolling between the editor and preview, and one-click rich-text copy for the WeChat Official Account editor. Local images, remote images, math, and Mermaid diagrams are converted only in memory, so the original Markdown stays clean. See the [full English README](README.en.md) for installation and usage details.
+
 ## 🚀 核心能力一览
 
 - **实时公众号预览**：编辑当前笔记时，右侧预览约 200ms 后自动刷新，无需先保存。

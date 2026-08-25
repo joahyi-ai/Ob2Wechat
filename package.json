@@ -1,8 +1,8 @@
 {
   "name": "wechat-publish-preview",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "packageManager": "pnpm@11.1.3",
-  "description": "Preview Obsidian Markdown with WeChat-ready styling, synchronized scrolling, and one-click rich-text copy.",
+  "description": "Preview Markdown with WeChat-ready styling, synchronized scrolling, and one-click rich-text copy.",
   "main": "main.js",
   "type": "module",
   "scripts": {
