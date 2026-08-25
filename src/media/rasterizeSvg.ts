@@ -117,3 +117,49 @@ export async function rasterizeSvgDataUrl(dataUrl: string, scale = 2): Promise<s
   const height = image.naturalHeight || DEFAULT_HEIGHT;
   return drawImageToPng(image, width, height, scale);
 }
+
+const LATEX_SYMBOLS: Record<string, string> = {
+  alpha: "α", beta: "β", gamma: "γ", delta: "δ", theta: "θ", lambda: "λ", mu: "μ",
+  pi: "π", sigma: "σ", phi: "φ", omega: "ω", Gamma: "Γ", Delta: "Δ", Theta: "Θ",
+  Lambda: "Λ", Pi: "Π", Sigma: "Σ", Phi: "Φ", Omega: "Ω", infty: "∞", int: "∫",
+  sum: "∑", prod: "∏", times: "×", cdot: "·", pm: "±", le: "≤", ge: "≥", ne: "≠",
+  approx: "≈", to: "→", leftarrow: "←", rightarrow: "→", sqrt: "√",
+};
+
+function readableMathSource(source: string): string {
+  return source
+    .replace(/\\sqrt\s*\{([^{}]+)\}/g, "√($1)")
+    .replace(/\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g, "($1)/($2)")
+    .replace(/\\([A-Za-z]+)/g, (_match, command: string) => LATEX_SYMBOLS[command] ?? command)
+    .replace(/\^\{([^{}]+)\}/g, "^($1)")
+    .replace(/_\{([^{}]+)\}/g, "_($1)")
+    .replace(/\{([^{}]+)\}/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Create a self-contained PNG when Obsidian's MathJax output uses CHTML. */
+export function rasterizeMathText(source: string, block: boolean): string {
+  const text = readableMathSource(source) || "数学公式";
+  const scale = 2;
+  const fontSize = block ? 22 : 17;
+  const horizontalPadding = block ? 20 : 6;
+  const verticalPadding = block ? 14 : 4;
+  const probe = document.createElement("canvas").getContext("2d");
+  if (!probe) throw new Error("Canvas is unavailable");
+  probe.font = `${fontSize}px Georgia, Times New Roman, serif`;
+  const width = Math.min(DEFAULT_WIDTH, Math.max(24, Math.ceil(probe.measureText(text).width) + horizontalPadding * 2));
+  const height = fontSize + verticalPadding * 2;
+  const canvas = document.createElement("canvas");
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Canvas is unavailable");
+  context.scale(scale, scale);
+  context.font = `${fontSize}px Georgia, Times New Roman, serif`;
+  context.fillStyle = "#333333";
+  context.textAlign = block ? "center" : "left";
+  context.textBaseline = "middle";
+  context.fillText(text, block ? width / 2 : horizontalPadding, height / 2, width - horizontalPadding * 2);
+  return canvas.toDataURL("image/png");
+}

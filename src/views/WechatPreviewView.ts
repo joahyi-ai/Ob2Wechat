@@ -204,7 +204,10 @@ export class WechatPreviewView extends ItemView {
       this.showCopyWarnings(payload.warnings);
 
       if (payload.warnings.length === 0) {
-        new Notice("已复制到剪贴板，可前往公众号后台粘贴");
+        const imageSummary = payload.embeddedImageCount > 0
+          ? `，已内嵌 ${payload.embeddedImageCount} 张图片`
+          : "";
+        new Notice(`已复制到剪贴板${imageSummary}，可前往公众号后台粘贴`);
       } else {
         new Notice(`已复制，但有 ${payload.warnings.length} 项未完全处理`);
       }

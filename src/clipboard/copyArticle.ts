@@ -9,6 +9,7 @@ export interface CopyPayload {
   html: string;
   text: string;
   warnings: ConversionWarning[];
+  embeddedImageCount: number;
 }
 
 export async function createCopyPayload(
@@ -23,10 +24,13 @@ export async function createCopyPayload(
   makeWechatCompatible(article);
   sanitizeArticle(article);
 
+  const embeddedImageCount = article.querySelectorAll<HTMLImageElement>('img[src^="data:image/"]').length;
+
   return {
     html: article.outerHTML.replace(/(<\/(?:strong|b|em|span|a|code)>)\s*([：；，。！？、])/g, "$1\u2060$2"),
     text: article.innerText,
     warnings: [...generatedWarnings, ...imageWarnings],
+    embeddedImageCount,
   };
 }
 

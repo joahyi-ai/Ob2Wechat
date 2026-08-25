@@ -1,5 +1,5 @@
 import type { ConversionWarning } from "./embedImages";
-import { rasterizeSvgElement } from "./rasterizeSvg";
+import { rasterizeMathText, rasterizeSvgElement } from "./rasterizeSvg";
 
 function imageElement(source: string, alt: string, style: string): HTMLImageElement {
   const image = document.createElement("img");
@@ -25,11 +25,12 @@ async function replaceMath(root: HTMLElement, warnings: ConversionWarning[]): Pr
   const containers = Array.from(root.querySelectorAll<HTMLElement>("mjx-container"));
   for (const container of containers) {
     const svg = container.querySelector<SVGSVGElement>("svg");
-    if (!svg) continue;
     const source = container.getAttribute("data-ob2wechat-source") ?? "数学公式";
     const block = container.getAttribute("display") === "true" || container.classList.contains("MathJax_Display");
     try {
-      const dataUrl = await rasterizeSvgElement(svg, 2.5);
+      const dataUrl = svg
+        ? await rasterizeSvgElement(svg, 2.5)
+        : rasterizeMathText(source, block);
       const image = imageElement(
         dataUrl,
         source,
