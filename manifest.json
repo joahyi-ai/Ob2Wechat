@@ -1,7 +1,7 @@
 {
   "id": "wechat-publish-preview",
   "name": "WeChat Publish Preview",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minAppVersion": "1.7.2",
   "description": "Preview Obsidian Markdown with WeChat-ready styling, synchronized scrolling, and one-click rich-text copy.",
   "author": "joahyi-ai",
