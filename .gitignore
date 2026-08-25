@@ -1,0 +1,13 @@
+node_modules/
+.pnpm-store/
+main.js
+main.js.map
+coverage/
+.DS_Store
+test-vault/.obsidian/workspace*.json
+test-vault/.obsidian/plugins/ob2wechat/main.js
+test-vault/.obsidian/plugins/ob2wechat/manifest.json
+test-vault/.obsidian/plugins/ob2wechat/styles.css
+test-vault/
+SPEC.md
+*.log
