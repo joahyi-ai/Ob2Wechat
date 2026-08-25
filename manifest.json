@@ -1,7 +1,7 @@
 {
   "id": "wechat-publish-preview",
   "name": "WeChat Publish Preview",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minAppVersion": "1.7.2",
   "description": "Preview Markdown with WeChat-compatible styling and copy rich text to the WeChat editor.",
   "author": "joahyi-ai",
