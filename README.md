@@ -71,13 +71,13 @@ Ob2Wechat 面向习惯在 Obsidian 中写作、最后发布到微信公众号的
 2. 在 Vault 中创建插件目录：
 
    ```text
-   <Vault>/.obsidian/plugins/ob2wechat/
+   <Vault>/.obsidian/plugins/wechat-publish-preview/
    ```
 
 3. 将三个文件放入该目录，最终结构应为：
 
    ```text
-   <Vault>/.obsidian/plugins/ob2wechat/
+   <Vault>/.obsidian/plugins/wechat-publish-preview/
    ├── main.js
    ├── manifest.json
    └── styles.css

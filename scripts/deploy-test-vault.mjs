@@ -1,7 +1,7 @@
 import { copyFile, mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 
-const pluginDir = resolve("test-vault/.obsidian/plugins/ob2wechat");
+const pluginDir = resolve("test-vault/.obsidian/plugins/wechat-publish-preview");
 await mkdir(pluginDir, { recursive: true });
 
 await Promise.all(
