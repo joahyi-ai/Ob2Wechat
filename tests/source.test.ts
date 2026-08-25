@@ -21,6 +21,7 @@ describe("Markdown source preparation", () => {
   it("adds the filename heading when one is not present", () => {
     const prepared = prepareMarkdown("正文", "文章.md");
     expect(prepared.markdown).toBe("# 文章\n\n正文");
+    expect(prepared.renderMarkdown).toContain('data-ob2wechat-source-offset="0"');
   });
 
   it("does not duplicate a matching first heading", () => {
@@ -37,5 +38,23 @@ describe("Markdown source preparation", () => {
     const hints = extractSourceHints("行内 $a+b$\n\n$$c=d$$\n\n```mermaid\ngraph TD\nA-->B\n```");
     expect(hints.math).toEqual(["a+b", "c=d"]);
     expect(hints.mermaid).toEqual(["graph TD\nA-->B"]);
+  });
+
+  it("keeps scroll markers out of the clean Markdown and maps past frontmatter", () => {
+    const markdown = "---\ntitle: hidden\n---\n\n第一段\n\n第二段";
+    const prepared = prepareMarkdown(markdown, "文章.md");
+    expect(prepared.markdown).not.toContain("data-ob2wechat-source-offset");
+    expect(prepared.renderMarkdown).toContain(
+      `data-ob2wechat-source-offset="${markdown.indexOf("第一段")}"`,
+    );
+    expect(prepared.renderMarkdown).toContain(
+      `data-ob2wechat-source-offset="${markdown.indexOf("第二段")}"`,
+    );
+  });
+
+  it("does not inject markers inside fenced code blocks", () => {
+    const prepared = prepareMarkdown("```text\n第一行\n\n第二行\n```\n\n正文", "代码.md");
+    const markerCount = prepared.renderMarkdown.match(/data-ob2wechat-source-offset/g)?.length ?? 0;
+    expect(markerCount).toBe(3);
   });
 });

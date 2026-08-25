@@ -10,11 +10,26 @@ import {
   VIEW_TYPE_WECHAT_PREVIEW,
   WechatPreviewView,
 } from "./views/WechatPreviewView";
-import { calculateScrollProgress } from "./scroll/scrollSync";
+import type { ScrollMetrics, SourceScrollGeometry } from "./scroll/scrollSync";
 
 export interface SourceSnapshot {
   file: TFile;
   markdown: string;
+}
+
+interface CodeMirrorBlockInfo {
+  top: number;
+}
+
+interface CodeMirrorViewLike {
+  contentHeight: number;
+  documentTop: number;
+  scaleY: number;
+  lineBlockAt(position: number): CodeMirrorBlockInfo;
+}
+
+interface EditorWithCodeMirror extends Editor {
+  cm?: CodeMirrorViewLike;
 }
 
 export default class Ob2WechatPlugin extends Plugin {
@@ -22,6 +37,10 @@ export default class Ob2WechatPlugin extends Plugin {
   private sourceScroller: HTMLElement | null = null;
   private sourceScrollFrame: number | null = null;
   private sourceScrollerRetryTimer: number | null = null;
+  private sourceScrollerObserver: MutationObserver | null = null;
+  private observedSourceContainer: HTMLElement | null = null;
+  private expectedSourceScrollTop: number | null = null;
+  private sourceScrollReleaseTimer: number | null = null;
 
   async onload(): Promise<void> {
     this.registerView(
@@ -134,8 +153,13 @@ export default class Ob2WechatPlugin extends Plugin {
   }
 
   private attachSourceScroller(view: MarkdownView): void {
+    this.observeSourceScroller(view);
     const scroller = view.containerEl.querySelector<HTMLElement>(".cm-scroller");
     if (!scroller) {
+      if (this.sourceScroller && !view.containerEl.contains(this.sourceScroller)) {
+        this.sourceScroller.removeEventListener("scroll", this.handleSourceScroll);
+        this.sourceScroller = null;
+      }
       if (this.sourceScrollerRetryTimer !== null) window.clearTimeout(this.sourceScrollerRetryTimer);
       this.sourceScrollerRetryTimer = window.setTimeout(() => {
         this.sourceScrollerRetryTimer = null;
@@ -147,14 +171,29 @@ export default class Ob2WechatPlugin extends Plugin {
     }
 
     if (this.sourceScroller === scroller) {
-      this.syncPreviewScroll();
+      this.syncPreviewFromEditor();
       return;
     }
 
-    this.detachSourceScroller();
+    if (this.sourceScroller) {
+      this.sourceScroller.removeEventListener("scroll", this.handleSourceScroll);
+    }
     this.sourceScroller = scroller;
     scroller.addEventListener("scroll", this.handleSourceScroll, { passive: true });
-    this.syncPreviewScroll();
+    this.expectedSourceScrollTop = null;
+    this.syncPreviewFromEditor();
+  }
+
+  private observeSourceScroller(view: MarkdownView): void {
+    if (this.observedSourceContainer === view.containerEl) return;
+    this.sourceScrollerObserver?.disconnect();
+    this.observedSourceContainer = view.containerEl;
+    this.sourceScrollerObserver = new MutationObserver(() => {
+      if (this.sourceView !== view) return;
+      const current = view.containerEl.querySelector<HTMLElement>(".cm-scroller");
+      if (current !== this.sourceScroller) this.attachSourceScroller(view);
+    });
+    this.sourceScrollerObserver.observe(view.containerEl, { childList: true, subtree: true });
   }
 
   private detachSourceScroller(): void {
@@ -166,28 +205,110 @@ export default class Ob2WechatPlugin extends Plugin {
       window.cancelAnimationFrame(this.sourceScrollFrame);
       this.sourceScrollFrame = null;
     }
+    if (this.sourceScrollReleaseTimer !== null) {
+      window.clearTimeout(this.sourceScrollReleaseTimer);
+      this.sourceScrollReleaseTimer = null;
+    }
     if (this.sourceScroller) {
       this.sourceScroller.removeEventListener("scroll", this.handleSourceScroll);
       this.sourceScroller = null;
     }
+    this.sourceScrollerObserver?.disconnect();
+    this.sourceScrollerObserver = null;
+    this.observedSourceContainer = null;
+    this.expectedSourceScrollTop = null;
   }
 
   private readonly handleSourceScroll = (): void => {
+    if (this.expectedSourceScrollTop !== null && this.sourceScroller) {
+      if (Math.abs(this.sourceScroller.scrollTop - this.expectedSourceScrollTop) < 2) return;
+      this.releaseSourceScrollLock();
+    }
     if (this.sourceScrollFrame !== null) return;
     this.sourceScrollFrame = window.requestAnimationFrame(() => {
       this.sourceScrollFrame = null;
-      this.syncPreviewScroll();
+      this.syncPreviewFromEditor();
     });
   };
 
-  private syncPreviewScroll(): void {
-    if (!this.sourceScroller) return;
-    const progress = calculateScrollProgress({
-      scrollTop: this.sourceScroller.scrollTop,
-      scrollHeight: this.sourceScroller.scrollHeight,
-      clientHeight: this.sourceScroller.clientHeight,
+  private releaseSourceScrollLock(): void {
+    this.expectedSourceScrollTop = null;
+    if (this.sourceScrollReleaseTimer !== null) {
+      window.clearTimeout(this.sourceScrollReleaseTimer);
+      this.sourceScrollReleaseTimer = null;
+    }
+  }
+
+  public syncPreviewFromEditor(): void {
+    if (!this.sourceScroller || !this.sourceView) return;
+    const preview = this.previewView();
+    if (!preview) return;
+    const sourceMarkdownLength = this.sourceView.editor.getValue().length;
+    const codeMirror = (this.sourceView.editor as EditorWithCodeMirror).cm;
+    const metrics = this.getSourceScrollMetrics(codeMirror);
+    const anchors = preview.getSourceAnchorOffsets().map((sourceOffset) => {
+      const boundedOffset = Math.min(sourceMarkdownLength, Math.max(0, sourceOffset));
+      let sourceTop = sourceMarkdownLength === 0
+        ? 0
+        : (boundedOffset / sourceMarkdownLength) * metrics.scrollHeight;
+      if (codeMirror) {
+        try {
+          sourceTop = codeMirror.lineBlockAt(boundedOffset).top;
+        } catch {
+          // Keep the proportional fallback if CodeMirror is between document updates.
+        }
+      }
+      return { sourceOffset, sourceTop };
     });
-    this.previewView()?.syncScrollFromEditor(progress);
+    const geometry: SourceScrollGeometry = {
+      ...metrics,
+      anchors,
+    };
+    preview.syncScrollFromEditor(geometry);
+  }
+
+  public syncEditorFromPreview(scrollTop: number): void {
+    if (!this.sourceScroller || !this.sourceView || !Number.isFinite(scrollTop)) return;
+    const codeMirror = (this.sourceView.editor as EditorWithCodeMirror).cm;
+    const metrics = this.getSourceScrollMetrics(codeMirror);
+    const maximum = Math.max(0, metrics.scrollHeight - metrics.clientHeight);
+    const target = Math.min(maximum, Math.max(0, scrollTop));
+    if (Math.abs(metrics.scrollTop - target) < 1) return;
+    const scaleY = codeMirror?.scaleY || 1;
+    const domMaximum = Math.max(0, this.sourceScroller.scrollHeight - this.sourceScroller.clientHeight);
+    const domTarget = Math.min(
+      domMaximum,
+      Math.max(0, this.sourceScroller.scrollTop + (target - metrics.scrollTop) * scaleY),
+    );
+
+    this.expectedSourceScrollTop = domTarget;
+    this.sourceScroller.scrollTop = domTarget;
+    this.previewView()?.updateSourceScrollTopFromPreview(target);
+    if (this.sourceScrollReleaseTimer !== null) {
+      window.clearTimeout(this.sourceScrollReleaseTimer);
+    }
+    this.sourceScrollReleaseTimer = window.setTimeout(() => {
+      this.sourceScrollReleaseTimer = null;
+      this.expectedSourceScrollTop = null;
+    }, 80);
+  }
+
+  private getSourceScrollMetrics(codeMirror: CodeMirrorViewLike | undefined): ScrollMetrics {
+    if (!this.sourceScroller || !codeMirror) {
+      return {
+        scrollTop: this.sourceScroller?.scrollTop ?? 0,
+        scrollHeight: this.sourceScroller?.scrollHeight ?? 0,
+        clientHeight: this.sourceScroller?.clientHeight ?? 0,
+      };
+    }
+
+    const viewportTop = this.sourceScroller.getBoundingClientRect().top;
+    const scaleY = codeMirror.scaleY || 1;
+    return {
+      scrollTop: Math.max(0, (viewportTop - codeMirror.documentTop) / scaleY),
+      scrollHeight: codeMirror.contentHeight,
+      clientHeight: this.sourceScroller.clientHeight / scaleY,
+    };
   }
 
   private refreshForFileEvent(file: TAbstractFile): void {
@@ -221,7 +342,7 @@ export default class Ob2WechatPlugin extends Plugin {
 
     await this.app.workspace.revealLeaf(leaf);
     this.previewView()?.scheduleRefresh(true);
-    this.syncPreviewScroll();
+    this.syncPreviewFromEditor();
   }
 
   private async copyViaPreview(): Promise<void> {

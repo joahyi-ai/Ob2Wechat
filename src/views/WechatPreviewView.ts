@@ -2,7 +2,13 @@ import { ItemView, Notice, WorkspaceLeaf } from "obsidian";
 import { createCopyPayload, writeCopyPayload } from "../clipboard/copyArticle";
 import type { ConversionWarning } from "../media/embedImages";
 import { PreviewRenderer, type RenderedArticle } from "../rendering/renderMarkdown";
-import { scrollTopForProgress } from "../scroll/scrollSync";
+import {
+  createScrollSyncPoints,
+  interpolateScrollPosition,
+  reverseScrollSyncPoints,
+  type ScrollSyncPoint,
+  type SourceScrollGeometry,
+} from "../scroll/scrollSync";
 import type Ob2WechatPlugin from "../main";
 
 export const VIEW_TYPE_WECHAT_PREVIEW = "ob2wechat-preview";
@@ -21,8 +27,11 @@ export class WechatPreviewView extends ItemView {
   private requestedRevision = 0;
   private currentArticle: RenderedArticle | null = null;
   private busy = false;
-  private editorScrollProgress = 0;
+  private sourceScrollGeometry: SourceScrollGeometry | null = null;
   private scrollSyncFrame: number | null = null;
+  private previewScrollFrame: number | null = null;
+  private expectedPreviewScrollTop: number | null = null;
+  private previewScrollReleaseTimer: number | null = null;
   private previewResizeObserver: ResizeObserver | null = null;
 
   constructor(
@@ -49,6 +58,7 @@ export class WechatPreviewView extends ItemView {
     this.buildInterface();
     this.previewResizeObserver = new ResizeObserver(() => this.scheduleScrollSync());
     this.previewResizeObserver.observe(this.previewScrollerEl);
+    this.previewResizeObserver.observe(this.previewEl);
     this.scheduleRefresh(true);
   }
 
@@ -61,27 +71,106 @@ export class WechatPreviewView extends ItemView {
       window.cancelAnimationFrame(this.scrollSyncFrame);
       this.scrollSyncFrame = null;
     }
+    if (this.previewScrollFrame !== null) {
+      window.cancelAnimationFrame(this.previewScrollFrame);
+      this.previewScrollFrame = null;
+    }
+    if (this.previewScrollReleaseTimer !== null) {
+      window.clearTimeout(this.previewScrollReleaseTimer);
+      this.previewScrollReleaseTimer = null;
+    }
     this.previewResizeObserver?.disconnect();
     this.previewResizeObserver = null;
     this.requestedRevision += 1;
     this.currentArticle = null;
+    this.sourceScrollGeometry = null;
   }
 
-  syncScrollFromEditor(progress: number): void {
-    this.editorScrollProgress = progress;
+  getSourceAnchorOffsets(): number[] {
+    return this.currentArticle?.scrollAnchors.map((anchor) => anchor.sourceOffset) ?? [];
+  }
+
+  syncScrollFromEditor(geometry: SourceScrollGeometry): void {
+    this.sourceScrollGeometry = geometry;
     this.scheduleScrollSync();
   }
 
+  updateSourceScrollTopFromPreview(scrollTop: number): void {
+    if (!this.sourceScrollGeometry) return;
+    this.sourceScrollGeometry = { ...this.sourceScrollGeometry, scrollTop };
+  }
+
   private scheduleScrollSync(): void {
-    if (!this.previewScrollerEl || this.scrollSyncFrame !== null) return;
+    if (!this.previewScrollerEl || !this.sourceScrollGeometry || this.scrollSyncFrame !== null) return;
     this.scrollSyncFrame = window.requestAnimationFrame(() => {
       this.scrollSyncFrame = null;
-      this.previewScrollerEl.scrollTop = scrollTopForProgress(
-        this.editorScrollProgress,
-        this.previewScrollerEl.scrollHeight,
-        this.previewScrollerEl.clientHeight,
-      );
+      const points = this.buildScrollSyncPoints();
+      if (points.length === 0 || !this.sourceScrollGeometry) return;
+      const target = interpolateScrollPosition(this.sourceScrollGeometry.scrollTop, points);
+      if (Math.abs(this.previewScrollerEl.scrollTop - target) < 1) return;
+      this.expectedPreviewScrollTop = target;
+      this.previewScrollerEl.scrollTop = target;
+      if (this.previewScrollReleaseTimer !== null) {
+        window.clearTimeout(this.previewScrollReleaseTimer);
+      }
+      this.previewScrollReleaseTimer = window.setTimeout(() => {
+        this.previewScrollReleaseTimer = null;
+        this.expectedPreviewScrollTop = null;
+      }, 80);
     });
+  }
+
+  private buildScrollSyncPoints(): ScrollSyncPoint[] {
+    if (!this.currentArticle || !this.sourceScrollGeometry) return [];
+    const sourceTops = new Map(
+      this.sourceScrollGeometry.anchors.map((anchor) => [anchor.sourceOffset, anchor.sourceTop]),
+    );
+    const scrollerRect = this.previewScrollerEl.getBoundingClientRect();
+    const anchors = this.currentArticle.scrollAnchors.flatMap((anchor) => {
+      const sourceTop = sourceTops.get(anchor.sourceOffset);
+      if (sourceTop === undefined || !anchor.element.isConnected) return [];
+      const targetRect = anchor.element.getBoundingClientRect();
+      return [{
+        sourceTop,
+        targetTop: targetRect.top - scrollerRect.top + this.previewScrollerEl.scrollTop,
+      }];
+    });
+
+    return createScrollSyncPoints(
+      this.sourceScrollGeometry,
+      {
+        scrollTop: this.previewScrollerEl.scrollTop,
+        scrollHeight: this.previewScrollerEl.scrollHeight,
+        clientHeight: this.previewScrollerEl.clientHeight,
+      },
+      anchors,
+    );
+  }
+
+  private readonly handlePreviewScroll = (): void => {
+    if (this.expectedPreviewScrollTop !== null) {
+      if (Math.abs(this.previewScrollerEl.scrollTop - this.expectedPreviewScrollTop) < 2) return;
+      this.releasePreviewScrollLock();
+    }
+    if (this.previewScrollFrame !== null) return;
+    this.previewScrollFrame = window.requestAnimationFrame(() => {
+      this.previewScrollFrame = null;
+      const points = this.buildScrollSyncPoints();
+      if (points.length === 0) return;
+      const sourceTarget = interpolateScrollPosition(
+        this.previewScrollerEl.scrollTop,
+        reverseScrollSyncPoints(points),
+      );
+      this.plugin.syncEditorFromPreview(sourceTarget);
+    });
+  };
+
+  private releasePreviewScrollLock(): void {
+    this.expectedPreviewScrollTop = null;
+    if (this.previewScrollReleaseTimer !== null) {
+      window.clearTimeout(this.previewScrollReleaseTimer);
+      this.previewScrollReleaseTimer = null;
+    }
   }
 
   scheduleRefresh(immediate = false): void {
@@ -127,6 +216,7 @@ export class WechatPreviewView extends ItemView {
     this.warningEl.hide();
 
     this.previewScrollerEl = this.contentEl.createDiv({ cls: "ob2wechat-preview-scroller" });
+    this.registerDomEvent(this.previewScrollerEl, "scroll", this.handlePreviewScroll, { passive: true });
     this.previewEl = this.previewScrollerEl.createDiv({ cls: "ob2wechat-preview-shell" });
     this.showEmptyState("请打开一个 Markdown 文件");
   }
@@ -164,7 +254,7 @@ export class WechatPreviewView extends ItemView {
     this.setStatus("预览已同步", "ready");
     this.warningEl.hide();
     this.copyButtonEl.disabled = false;
-    this.scheduleScrollSync();
+    this.plugin.syncPreviewFromEditor();
   }
 
   private showEmptyState(message: string): void {
@@ -173,7 +263,8 @@ export class WechatPreviewView extends ItemView {
     this.setStatus("", "idle");
     this.warningEl.hide();
     this.copyButtonEl.disabled = true;
-    this.editorScrollProgress = 0;
+    this.sourceScrollGeometry = null;
+    this.releasePreviewScrollLock();
     this.previewScrollerEl.scrollTop = 0;
   }
 
