@@ -4,22 +4,22 @@
 
 让微信公众号排版留在 Obsidian 里。
 
-WeChat Publish Preview 是一款面向公众号写作者的 Obsidian 桌面端插件。它会在右侧边栏实时呈现当前 Markdown 笔记的公众号样式，并将正文复制为可直接粘贴到微信公众号编辑器的富文本。
+WeChat Publish Preview 是一款面向公众号写作者的 Obsidian 桌面端插件。它会在右侧边栏实时呈现当前 Markdown 笔记的公众号样式，编辑区与预览区支持按段落双向滚动同步；排版完成后，可一键复制富文本并直接粘贴到公众号草稿编辑器。
 
-从写作、预览到复制，整个过程都在 Obsidian 内完成。本地图片、网络图片、数学公式和 Mermaid 只在复制阶段于内存中转换，不会把 Base64 写回笔记，也不需要配置公众号 AppID 或 AppSecret。
+从写作、预览到复制，整个过程都在 Obsidian 内完成。复制时，本地图片会在内存中自动转换为 Base64 并随正文写入剪贴板，无需图床；网络图片、数学公式和 Mermaid 也会尽量转换为可复制的内容。所有转换都不会写回原始笔记，也不需要配置公众号 AppID 或 AppSecret。
 
 ![WeChat Publish Preview 在 Obsidian 中实时预览公众号排版](images/wechat-publish-preview.png)
 
 ## English summary
 
-WeChat Publish Preview provides a live, WeChat-ready Markdown preview in the right sidebar, synchronized scrolling between the editor and preview, and one-click rich-text copy for the WeChat Official Account editor. Local images, remote images, math, and Mermaid diagrams are converted only in memory, so the original Markdown stays clean. See the [full English README](README.en.md) for installation and usage details.
+WeChat Publish Preview provides a live, WeChat-ready Markdown preview in the right sidebar, bidirectional scrolling between the editor and preview, and one-click rich-text copy for the WeChat Official Account draft editor. Local images are converted to Base64 in memory, so no image host is required and the original Markdown stays clean. See the [full English README](README.en.md) for installation and usage details.
 
 ## 🚀 核心能力一览
 
 - **实时公众号预览**：编辑当前笔记时，右侧预览约 200ms 后自动刷新，无需先保存。
-- **双向同步滚动**：编辑区与预览区按正文段落对齐，长文阅读和修改时不容易丢失位置。
-- **一键复制富文本**：点击“复制正文”，即可粘贴到微信公众号后台正文编辑区。
-- **保持原文干净**：所有图片和图表转换都在内存副本中完成，不修改 Markdown 和附件。
+- **双向滚动同步**：无论滚动编辑区还是预览区，另一侧都会按正文段落跟随，长文修改时不容易丢失位置。
+- **一键复制到公众号草稿**：点击“复制正文”，即可将排版后的富文本粘贴到微信公众号后台的草稿编辑器。
+- **图片转 Base64，无需图床**：本地图片会在复制时自动内嵌到富文本中，不用先上传图床；转换只发生在内存副本中，不修改 Markdown 和附件。
 - **适配 Obsidian 内容**：支持 WikiLink 图片、相对路径图片、Callout、脚注、数学公式和 Mermaid。
 - **本地优先**：不收集遥测，不读取公众号凭据，不自动上传文章或提交草稿。
 
@@ -35,7 +35,7 @@ WeChat Publish Preview provides a live, WeChat-ready Markdown preview in the rig
 
 ### 3. 本地图片无需图床
 
-插件支持 Obsidian 的 `![[Wiki Link]]`、相对路径图片、Vault 附件和网络图片。复制时会尽量将图片转换为内嵌数据；单张图片处理失败不会中断全文复制，并会列出警告。
+插件支持 Obsidian 的 `![[Wiki Link]]`、相对路径图片、Vault 附件和网络图片。复制时，本地图片会读取为 Base64 Data URL，与排版后的富文本一起写入剪贴板，直接粘贴到公众号草稿编辑器即可，无需配置图床。网络图片会尝试下载并转换；单张图片处理失败不会中断全文复制，并会列出警告。
 
 ### 4. 公式与 Mermaid 可复制
 
@@ -63,8 +63,8 @@ WeChat Publish Preview provides a live, WeChat-ready Markdown preview in the rig
 | 有序/无序列表、任务列表 | ✅ | ✅ |
 | 引用、Callout、脚注 | ✅ | ✅ |
 | 代码块、表格 | ✅ | ✅ |
-| Obsidian 本地及相对路径图片 | ✅ | 自动内嵌 |
-| 网络图片 | ✅ | 尝试内嵌；失败时警告 |
+| Obsidian 本地及相对路径图片 | ✅ | Base64 内嵌，无需图床 |
+| 网络图片 | ✅ | 尝试转为 Base64；失败时警告 |
 | 数学公式、Mermaid | ✅ | 转换为图片 |
 
 当前版本不提供样式库、公众号账号配置或自动提交草稿箱功能。

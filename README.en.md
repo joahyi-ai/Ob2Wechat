@@ -4,18 +4,18 @@
 
 Keep your WeChat formatting workflow inside Obsidian.
 
-WeChat Publish Preview is a desktop plugin for writers who draft Markdown in Obsidian and publish through the WeChat Official Account editor. It renders the active note with WeChat-ready styling in the right sidebar and copies the article body as rich text that can be pasted directly into WeChat.
+WeChat Publish Preview is a desktop plugin for writers who draft Markdown in Obsidian and publish through the WeChat Official Account editor. It renders the active note with WeChat-ready styling in the right sidebar, keeps the editor and preview aligned with bidirectional scroll sync, and copies the formatted article body in one click for direct pasting into the WeChat draft editor.
 
-Local images, remote images, math, and Mermaid diagrams are converted only in memory during copy. The plugin never writes Base64 data back to your notes and does not require a WeChat AppID or AppSecret.
+During copy, local images are automatically converted to Base64 and embedded with the rich text, so no image-hosting service is required. Remote images, math, and Mermaid diagrams are also converted when possible. All conversion happens in memory: the plugin never writes Base64 data back to your notes and does not require a WeChat AppID or AppSecret.
 
 ![Live WeChat article preview in Obsidian](images/wechat-publish-preview.png)
 
 ## 🚀 Highlights
 
 - **Live preview** updates shortly after you edit the active note, without requiring a save.
-- **Bidirectional scroll sync** keeps the editor and preview aligned by document anchors.
-- **One-click rich-text copy** produces content ready for the WeChat article body editor.
-- **Clean Markdown** keeps all image and diagram conversion in an in-memory clone.
+- **Bidirectional scroll sync** keeps either pane aligned when you scroll the editor or the preview.
+- **One-click copy to WeChat drafts** produces rich text ready to paste into the WeChat draft editor.
+- **Base64 images with no image host** automatically embeds local images during copy while keeping the Markdown and attachments unchanged.
 - **Obsidian-aware rendering** supports wiki-linked images, relative images, callouts, footnotes, math, and Mermaid.
 - **Local-first design** includes no telemetry, credential access, or automatic draft submission.
 
@@ -37,8 +37,8 @@ Local images, remote images, math, and Mermaid diagrams are converted only in me
 | Ordered, unordered, and task lists | ✅ | ✅ |
 | Blockquotes, callouts, footnotes | ✅ | ✅ |
 | Code blocks and tables | ✅ | ✅ |
-| Local and relative Obsidian images | ✅ | Embedded automatically |
-| Remote images | ✅ | Embedded when possible; otherwise warned |
+| Local and relative Obsidian images | ✅ | Embedded as Base64; no image host needed |
+| Remote images | ✅ | Converted to Base64 when possible; otherwise warned |
 | Math and Mermaid | ✅ | Converted to images |
 
 The current release does not include a theme library, WeChat account configuration, or automatic draft submission.
