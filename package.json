@@ -1,8 +1,8 @@
 {
   "name": "wechat-publish-preview",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "packageManager": "pnpm@11.1.3",
-  "description": "Preview Markdown with WeChat-ready styling, synchronized scrolling, and one-click rich-text copy.",
+  "description": "Preview Markdown with WeChat-ready styling and two-way scroll sync. Convert local images to Base64 and copy rich text to the WeChat draft editor—no image host needed.",
   "main": "main.js",
   "type": "module",
   "scripts": {

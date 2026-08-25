@@ -1,9 +1,9 @@
 {
   "id": "wechat-publish-preview",
   "name": "WeChat Publish Preview",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "minAppVersion": "1.7.2",
-  "description": "Preview Markdown with WeChat-ready styling, synchronized scrolling, and one-click rich-text copy.",
+  "description": "Preview Markdown with WeChat-ready styling and two-way scroll sync. Convert local images to Base64 and copy rich text to the WeChat draft editor—no image host needed.",
   "author": "joahyi-ai",
   "isDesktopOnly": true
 }
