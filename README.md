@@ -84,12 +84,12 @@ WeChat Publish Preview provides a live, WeChat-ready Markdown preview in the rig
 
 1. 安装并启用 [BRAT](https://github.com/TfTHacker/obsidian42-brat)。
 2. 打开命令面板，运行 `BRAT: Add a beta plugin for testing`。
-3. 输入仓库：`joahyi-ai/Ob2Wechat`。
+3. 输入仓库：`joahyi-ai/WeChat-Publish-Preview`。
 4. 安装完成后，在“设置” → “社区插件”中启用 WeChat Publish Preview。
 
 ### 方式三：从 GitHub Release 手动安装
 
-1. 前往 [GitHub Releases](https://github.com/joahyi-ai/Ob2Wechat/releases) 下载 `main.js`、`manifest.json` 和 `styles.css`。
+1. 前往 [GitHub Releases](https://github.com/joahyi-ai/WeChat-Publish-Preview/releases) 下载 `main.js`、`manifest.json` 和 `styles.css`。
 2. 将三个文件放入以下目录：
 
    ```text
@@ -136,7 +136,7 @@ pnpm verify
 
 ## 🤝 贡献
 
-欢迎通过 [Issues](https://github.com/joahyi-ai/Ob2Wechat/issues) 反馈问题，也欢迎提交 Pull Request。
+欢迎通过 [Issues](https://github.com/joahyi-ai/WeChat-Publish-Preview/issues) 反馈问题，也欢迎提交 Pull Request。
 
 ## 🙏 致谢
 

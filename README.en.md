@@ -57,12 +57,12 @@ Once the community-directory review is complete:
 
 1. Install and enable [BRAT](https://github.com/TfTHacker/obsidian42-brat).
 2. Run `BRAT: Add a beta plugin for testing` from the command palette.
-3. Enter `joahyi-ai/Ob2Wechat`.
+3. Enter `joahyi-ai/WeChat-Publish-Preview`.
 4. Enable WeChat Publish Preview under **Settings → Community plugins**.
 
 ### Manual installation
 
-Download `main.js`, `manifest.json`, and `styles.css` from the latest [GitHub Release](https://github.com/joahyi-ai/Ob2Wechat/releases), then place them in:
+Download `main.js`, `manifest.json`, and `styles.css` from the latest [GitHub Release](https://github.com/joahyi-ai/WeChat-Publish-Preview/releases), then place them in:
 
 ```text
 <Vault>/.obsidian/plugins/wechat-publish-preview/
