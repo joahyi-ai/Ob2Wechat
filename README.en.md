@@ -1,4 +1,4 @@
-[简体中文](README.md) | English
+English | [简体中文](README.zh-CN.md)
 
 # 📝 WeChat Publish Preview
 
@@ -82,6 +82,10 @@ Reload Obsidian and enable the plugin.
 WeChat Publish Preview runs locally, does not collect telemetry, and never submits drafts automatically. It reads only the active note and referenced Vault images. Network requests occur only for remote images, and clipboard access occurs only after an explicit copy action.
 
 ## 🗒 Changelog
+
+### 1.1.1 — 2026-08-27
+
+- Made the repository's primary `README.md` fully English and moved the Chinese documentation to `README.zh-CN.md` to satisfy the Obsidian Community directory's English documentation requirement.
 
 ### 1.1.0 — 2026-08-26
 
