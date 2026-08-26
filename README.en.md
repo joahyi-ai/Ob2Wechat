@@ -1,4 +1,4 @@
-English | [简体中文](README.zh-CN.md)
+English | [Chinese translation](README.zh-CN.md)
 
 # 📝 WeChat Publish Preview
 
