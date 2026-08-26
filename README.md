@@ -10,10 +10,6 @@ WeChat Publish Preview 是一款面向公众号写作者的 Obsidian 桌面端�
 
 ![WeChat Publish Preview 在 Obsidian 中实时预览公众号排版](images/wechat-publish-preview.png)
 
-![当前排版样式下的 TODO 勾选框与富文本预览](images/wechat-publish-preview-tasks.png)
-
-*最新界面：顶部可切换 30 套排版样式，Callout 区块和 TODO 勾选框都会跟随当前主题配色。*
-
 ## English summary
 
 WeChat Publish Preview provides a live, WeChat-ready Markdown preview in the right sidebar, bidirectional scrolling between the editor and preview, and one-click rich-text copy for the WeChat Official Account draft editor. Local images are converted to Base64 in memory, so no image host is required and the original Markdown stays clean. See the [full English README](README.en.md) for installation and usage details.
@@ -143,7 +139,7 @@ WeChat Publish Preview 默认只在本地工作，不收集遥测，也不会自
 - Callout 类型符号在预览中保留并继承当前主题配色；复制时转换为微信兼容的静态结构。
 - TODO 勾选框改为插件自绘，已完成和未完成状态均跟随当前主题强调色，并在复制结果中保持一致。
 - 改进深色主题的代码高亮、引用/Callout 可读性、列表层级和主题字体保留。
-- 更新 README 实例截图，展示新版样式选择、主题化 Callout 和 TODO 勾选框效果。
+- 更新 README 实例截图，展示新版样式选择与主题化 Callout 效果。
 
 ### 1.0.4 — 2026-08-25
 
