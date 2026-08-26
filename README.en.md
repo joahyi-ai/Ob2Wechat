@@ -10,6 +10,10 @@ During copy, local images are automatically converted to Base64 and embedded wit
 
 ![Live WeChat article preview in Obsidian](images/wechat-publish-preview.png)
 
+![Theme-aware TODO checkboxes and rich-text preview](images/wechat-publish-preview-tasks.png)
+
+*Latest interface: switch among 30 article themes from the toolbar while callout blocks and TODO markers inherit the active theme colors.*
+
 ## 🚀 Highlights
 
 - **Live preview** updates shortly after you edit the active note, without requiring a save.
@@ -89,6 +93,7 @@ WeChat Publish Preview runs locally, does not collect telemetry, and never submi
 - Kept callout type symbols visible and theme-colored in the preview, with static WeChat-compatible callout output during copy.
 - Replaced native Obsidian task checkboxes with theme-colored checked and unchecked markers that remain consistent in copied content.
 - Improved dark-theme code highlighting, callout readability, nested list styling, and preservation of theme typography.
+- Refreshed the README screenshots to show the new style selector, theme-aware callouts, and themed TODO markers.
 
 ### 1.0.4 — 2026-08-25
 
