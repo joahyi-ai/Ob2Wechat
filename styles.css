@@ -20,6 +20,7 @@
   min-height: 0;
   padding: 0;
   background: var(--background-secondary);
+  container-type: inline-size;
 }
 
 .ob2wechat-toolbar {
@@ -34,6 +35,15 @@
 
 .ob2wechat-title-group {
   flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ob2wechat-toolbar-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
   min-width: 0;
 }
 
@@ -67,6 +77,164 @@
 .ob2wechat-copy-button:disabled {
   cursor: not-allowed;
   opacity: 0.58;
+}
+
+.ob2wechat-theme-picker {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.ob2wechat-toolbar button.ob2wechat-theme-button {
+  display: block;
+  max-width: 190px;
+  min-width: 132px;
+  overflow: hidden;
+  color: #057a3d;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-color: rgba(7, 193, 96, 0.24) !important;
+  background-color: #e3f8ec !important;
+  background-image: none !important;
+  box-shadow: none;
+}
+
+.ob2wechat-toolbar button.ob2wechat-theme-button:hover,
+.ob2wechat-toolbar button.ob2wechat-theme-button.is-open {
+  border-color: var(--ob2wechat-green) !important;
+  color: #046c37;
+  background-color: #cef2de !important;
+}
+
+.theme-dark .ob2wechat-toolbar button.ob2wechat-theme-button {
+  color: #6ee7a8;
+  border-color: rgba(7, 193, 96, 0.38) !important;
+  background-color: rgba(7, 193, 96, 0.18) !important;
+}
+
+.theme-dark .ob2wechat-toolbar button.ob2wechat-theme-button:hover,
+.theme-dark .ob2wechat-toolbar button.ob2wechat-theme-button.is-open {
+  color: #9af0c2;
+  background-color: rgba(7, 193, 96, 0.28) !important;
+}
+
+.ob2wechat-theme-menu {
+  position: absolute;
+  z-index: 1000;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 430px;
+  max-width: calc(100cqw - 28px);
+  max-height: min(70vh, 620px);
+  padding: 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--ob2wechat-border);
+  border-radius: 12px;
+  background: var(--background-primary);
+  box-shadow: 0 16px 42px rgba(15, 23, 42, 0.22);
+}
+
+.ob2wechat-theme-menu[hidden] {
+  display: none;
+}
+
+.ob2wechat-theme-group + .ob2wechat-theme-group {
+  padding-top: 8px;
+  border-top: 1px solid var(--ob2wechat-border);
+}
+
+.ob2wechat-theme-group-label {
+  padding: 6px 7px 7px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+}
+
+.ob2wechat-theme-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  padding-bottom: 8px;
+}
+
+.ob2wechat-theme-option {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 14px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: auto;
+  min-height: 54px;
+  padding: 7px 8px;
+  color: var(--text-normal);
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ob2wechat-theme-option:hover,
+.ob2wechat-theme-option:focus-visible {
+  border-color: var(--ob2wechat-border);
+  background: var(--background-modifier-hover);
+}
+
+.ob2wechat-theme-option.is-selected {
+  border-color: var(--ob2wechat-green);
+  background: var(--ob2wechat-green-soft);
+}
+
+.ob2wechat-theme-swatch {
+  display: flex;
+  width: 42px;
+  height: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+}
+
+.ob2wechat-theme-swatch > span {
+  flex: 1 1 0;
+}
+
+.ob2wechat-theme-option-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ob2wechat-theme-option-name {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ob2wechat-theme-option-description {
+  display: -webkit-box;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.ob2wechat-theme-check {
+  color: transparent;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ob2wechat-theme-option.is-selected .ob2wechat-theme-check {
+  color: var(--ob2wechat-green);
 }
 
 .ob2wechat-status {
@@ -178,8 +346,25 @@
     flex-direction: column;
   }
 
-  .ob2wechat-copy-button {
+  .ob2wechat-toolbar-actions {
     width: 100%;
+  }
+
+  .ob2wechat-theme-picker {
+    flex: 1 1 auto;
+  }
+
+  .ob2wechat-theme-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ob2wechat-copy-button {
+    flex: 1 0 auto;
+  }
+
+  .ob2wechat-theme-options {
+    grid-template-columns: 1fr;
   }
 
   .ob2wechat-preview-scroller {

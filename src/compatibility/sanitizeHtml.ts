@@ -31,5 +31,6 @@ export function sanitizeArticle(root: HTMLElement): HTMLElement {
 
   root.removeAttribute("class");
   root.removeAttribute("data-ob2wechat-article");
+  root.removeAttribute("data-ob2wechat-theme");
   return root;
 }

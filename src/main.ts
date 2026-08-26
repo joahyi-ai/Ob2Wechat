@@ -11,6 +11,7 @@ import {
   WechatPreviewView,
 } from "./views/WechatPreviewView";
 import type { ScrollMetrics, SourceScrollGeometry } from "./scroll/scrollSync";
+import { DEFAULT_THEME_ID, isThemeId } from "./theme/raphael";
 
 export interface SourceSnapshot {
   file: TFile;
@@ -33,6 +34,7 @@ interface EditorWithCodeMirror extends Editor {
 }
 
 export default class Ob2WechatPlugin extends Plugin {
+  private selectedThemeId = DEFAULT_THEME_ID;
   private sourceView: MarkdownView | null = null;
   private sourceScroller: HTMLElement | null = null;
   private sourceScrollFrame: number | null = null;
@@ -43,6 +45,11 @@ export default class Ob2WechatPlugin extends Plugin {
   private sourceScrollReleaseTimer: number | null = null;
 
   async onload(): Promise<void> {
+    const stored = await this.loadData() as { themeId?: unknown } | null;
+    if (typeof stored?.themeId === "string" && isThemeId(stored.themeId)) {
+      this.selectedThemeId = stored.themeId;
+    }
+
     this.registerView(
       VIEW_TYPE_WECHAT_PREVIEW,
       (leaf) => new WechatPreviewView(leaf, this),
@@ -116,6 +123,16 @@ export default class Ob2WechatPlugin extends Plugin {
 
   onunload(): void {
     this.detachSourceScroller();
+  }
+
+  getSelectedThemeId(): string {
+    return this.selectedThemeId;
+  }
+
+  async setSelectedThemeId(themeId: string): Promise<void> {
+    if (!isThemeId(themeId) || themeId === this.selectedThemeId) return;
+    this.selectedThemeId = themeId;
+    await this.saveData({ themeId });
   }
 
   getSourceSnapshot(): SourceSnapshot | null {

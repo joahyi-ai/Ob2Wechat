@@ -9,13 +9,14 @@ function replaceElementTag(element: HTMLElement, tagName: keyof HTMLElementTagNa
 }
 
 function staticizeTasks(root: HTMLElement): void {
+  const themeAccent = root.style.getPropertyValue("--ob2wechat-theme-accent").trim();
   root.querySelectorAll<HTMLInputElement>('input[type="checkbox"]').forEach((checkbox) => {
     const marker = createSpan();
     marker.textContent = checkbox.checked ? "☑" : "☐";
     marker.setCssStyles({
       display: "inline-block",
       marginRight: "8px",
-      color: "#07c160",
+      color: checkbox.style.accentColor || themeAccent || "#07c160",
       fontSize: "1em",
       verticalAlign: "baseline",
     });
@@ -46,12 +47,13 @@ function normalizeLinks(root: HTMLElement): void {
 }
 
 function distributeContainerStyles(root: HTMLElement): void {
-  const family = "-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,\"Helvetica Neue\",Arial,\"PingFang SC\",\"Microsoft YaHei\",sans-serif";
+  const family = root.style.fontFamily || "-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,\"Helvetica Neue\",Arial,\"PingFang SC\",\"Microsoft YaHei\",sans-serif";
+  const lineHeight = root.style.lineHeight || "1.7";
   root.querySelectorAll<HTMLElement>("p,li,h1,h2,h3,h4,h5,h6,blockquote,td,th,span").forEach((element) => {
     if (element.closest("pre,code")) return;
     if (!element.style.fontFamily) element.setCssStyles({ fontFamily: family });
     if (!element.style.lineHeight && ["P", "LI", "BLOCKQUOTE", "TD", "TH"].includes(element.tagName)) {
-      element.setCssStyles({ lineHeight: "1.7" });
+      element.setCssStyles({ lineHeight });
     }
   });
 }

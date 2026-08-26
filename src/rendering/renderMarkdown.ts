@@ -14,6 +14,7 @@ export interface RenderedArticle {
   plainText: string;
   sourceMarkdown: string;
   sourcePath: string;
+  themeId: string;
   scrollAnchors: RenderedScrollAnchor[];
 }
 
@@ -82,7 +83,7 @@ export function materializeScrollAnchors(root: HTMLElement): RenderedScrollAncho
 export class PreviewRenderer {
   constructor(private readonly app: App) {}
 
-  async render(markdown: string, file: TFile): Promise<RenderedArticle> {
+  async render(markdown: string, file: TFile, themeId: string): Promise<RenderedArticle> {
     const prepared = prepareMarkdown(markdown, file.name);
     const staging = createStagingElement();
     const component = new Component();
@@ -98,13 +99,14 @@ export class PreviewRenderer {
 
       normalizeRenderedDocument(article, prepared.hints, prepared.title);
       const scrollAnchors = materializeScrollAnchors(article);
-      applyWechatTheme(article);
+      applyWechatTheme(article, themeId);
 
       return {
         article,
         plainText: article.innerText,
         sourceMarkdown: markdown,
         sourcePath: file.path,
+        themeId: article.dataset.ob2wechatTheme ?? themeId,
         scrollAnchors,
       };
     } finally {

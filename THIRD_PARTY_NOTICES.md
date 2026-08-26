@@ -2,7 +2,7 @@
 
 ## Raphael Publish
 
-Parts of the fixed WeChat theme and the WeChat HTML compatibility approach are
+The article theme library and parts of the WeChat HTML compatibility approach are
 adapted from [Raphael Publish](https://github.com/liuxiaopai-ai/raphael-publish).
 
 MIT License

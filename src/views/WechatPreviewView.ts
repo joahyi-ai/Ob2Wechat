@@ -9,6 +9,7 @@ import {
   type ScrollSyncPoint,
   type SourceScrollGeometry,
 } from "../scroll/scrollSync";
+import { getTheme, THEME_GROUPS, type Theme } from "../theme/raphael";
 import type Ob2WechatPlugin from "../main";
 
 export const VIEW_TYPE_WECHAT_PREVIEW = "ob2wechat-preview";
@@ -18,6 +19,8 @@ export class WechatPreviewView extends ItemView {
   private readonly renderer: PreviewRenderer;
   private toolbarEl!: HTMLElement;
   private fileNameEl!: HTMLElement;
+  private themeButtonEl!: HTMLButtonElement;
+  private themeMenuEl!: HTMLElement;
   private copyButtonEl!: HTMLButtonElement;
   private statusEl!: HTMLElement;
   private warningEl!: HTMLElement;
@@ -81,6 +84,7 @@ export class WechatPreviewView extends ItemView {
     }
     this.previewResizeObserver?.disconnect();
     this.previewResizeObserver = null;
+    this.closeThemeMenu();
     this.requestedRevision += 1;
     this.currentArticle = null;
     this.sourceScrollGeometry = null;
@@ -201,7 +205,10 @@ export class WechatPreviewView extends ItemView {
     titleGroup.createDiv({ cls: "ob2wechat-eyebrow", text: "公众号预览" });
     this.fileNameEl = titleGroup.createDiv({ cls: "ob2wechat-file-name", text: "未选择笔记" });
 
-    this.copyButtonEl = this.toolbarEl.createEl("button", {
+    const toolbarActions = this.toolbarEl.createDiv({ cls: "ob2wechat-toolbar-actions" });
+    this.buildThemePicker(toolbarActions);
+
+    this.copyButtonEl = toolbarActions.createEl("button", {
       cls: "mod-cta ob2wechat-copy-button",
       text: "复制正文",
       attr: {
@@ -221,6 +228,115 @@ export class WechatPreviewView extends ItemView {
     this.showEmptyState("请打开一个 Markdown 文件");
   }
 
+  private buildThemePicker(parent: HTMLElement): void {
+    const picker = parent.createDiv({ cls: "ob2wechat-theme-picker" });
+    this.themeButtonEl = picker.createEl("button", {
+      cls: "ob2wechat-theme-button",
+      attr: {
+        type: "button",
+        "aria-haspopup": "listbox",
+        "aria-expanded": "false",
+      },
+    });
+    this.themeMenuEl = picker.createDiv({
+      cls: "ob2wechat-theme-menu",
+      attr: {
+        role: "listbox",
+        "aria-label": "选择公众号排版样式",
+      },
+    });
+
+    THEME_GROUPS.forEach((group) => {
+      const section = this.themeMenuEl.createDiv({ cls: "ob2wechat-theme-group" });
+      section.createDiv({ cls: "ob2wechat-theme-group-label", text: `${group.label} · ${group.themes.length} 款` });
+      const options = section.createDiv({ cls: "ob2wechat-theme-options" });
+      group.themes.forEach((theme) => this.createThemeOption(options, theme));
+    });
+
+    this.closeThemeMenu();
+    this.syncThemePicker();
+    this.registerDomEvent(this.themeButtonEl, "click", (event) => {
+      event.stopPropagation();
+      this.setThemeMenuOpen(this.themeMenuEl.hidden);
+    });
+    this.registerDomEvent(document, "pointerdown", (event) => {
+      if (!picker.contains(event.target as Node)) this.closeThemeMenu();
+    });
+    this.registerDomEvent(document, "keydown", (event) => {
+      if (event.key === "Escape") {
+        this.closeThemeMenu();
+        this.themeButtonEl.focus();
+      }
+    });
+  }
+
+  private createThemeOption(parent: HTMLElement, theme: Theme): void {
+    const option = parent.createEl("button", {
+      cls: "ob2wechat-theme-option",
+      attr: {
+        type: "button",
+        role: "option",
+        "data-theme-id": theme.id,
+        title: theme.description,
+      },
+    });
+    const swatch = option.createSpan({ cls: "ob2wechat-theme-swatch", attr: { "aria-hidden": "true" } });
+    [
+      this.readThemeColor(theme.styles.container, "background-color", "#ffffff"),
+      this.readThemeColor(theme.styles.h1, "color", "#333333"),
+      this.readThemeColor(theme.styles.a, "color", "#07c160"),
+    ].forEach((color) => swatch.createSpan().setCssStyles({ backgroundColor: color }));
+    const text = option.createSpan({ cls: "ob2wechat-theme-option-text" });
+    text.createSpan({ cls: "ob2wechat-theme-option-name", text: theme.name });
+    text.createSpan({ cls: "ob2wechat-theme-option-description", text: theme.description });
+    option.createSpan({ cls: "ob2wechat-theme-check", text: "✓", attr: { "aria-hidden": "true" } });
+    this.registerDomEvent(option, "click", (event) => {
+      event.stopPropagation();
+      void this.selectTheme(theme.id);
+    });
+  }
+
+  private readThemeColor(cssText: string | undefined, property: string, fallback: string): string {
+    if (!cssText) return fallback;
+    const expression = new RegExp(`(?:^|;)\\s*${property}\\s*:\\s*([^;!]+)`, "i");
+    return cssText.match(expression)?.[1]?.trim() ?? fallback;
+  }
+
+  private setThemeMenuOpen(open: boolean): void {
+    this.themeMenuEl.hidden = !open;
+    this.themeButtonEl.setAttribute("aria-expanded", String(open));
+    this.themeButtonEl.toggleClass("is-open", open);
+    if (open) {
+      this.themeMenuEl.querySelector<HTMLButtonElement>('[aria-selected="true"]')?.focus();
+    }
+  }
+
+  private closeThemeMenu(): void {
+    if (!this.themeMenuEl || !this.themeButtonEl) return;
+    this.setThemeMenuOpen(false);
+  }
+
+  private syncThemePicker(): void {
+    const selectedId = this.plugin.getSelectedThemeId();
+    const theme = getTheme(selectedId);
+    this.themeButtonEl.setText(`样式 · ${theme.name}  ▾`);
+    this.themeButtonEl.setAttribute("aria-label", `当前样式：${theme.name}，点击选择其他样式`);
+    this.themeMenuEl.querySelectorAll<HTMLButtonElement>(".ob2wechat-theme-option").forEach((option) => {
+      const selected = option.dataset.themeId === theme.id;
+      option.toggleClass("is-selected", selected);
+      option.setAttribute("aria-selected", String(selected));
+    });
+  }
+
+  private async selectTheme(themeId: string): Promise<void> {
+    this.closeThemeMenu();
+    if (themeId === this.plugin.getSelectedThemeId()) return;
+    await this.plugin.setSelectedThemeId(themeId);
+    this.syncThemePicker();
+    this.setStatus(`正在应用「${getTheme(themeId).name}」样式…`, "loading");
+    this.scheduleRefresh(true);
+  }
+
   private async renderRevision(revision: number): Promise<void> {
     const snapshot = this.plugin.getSourceSnapshot();
     if (!snapshot) {
@@ -238,7 +354,11 @@ export class WechatPreviewView extends ItemView {
     if (!this.currentArticle) this.setStatus("正在生成预览…", "loading");
 
     try {
-      const rendered = await this.renderer.render(snapshot.markdown, snapshot.file);
+      const rendered = await this.renderer.render(
+        snapshot.markdown,
+        snapshot.file,
+        this.plugin.getSelectedThemeId(),
+      );
       if (revision !== this.requestedRevision) return;
       this.commitRenderedArticle(rendered);
     } catch (error) {
@@ -301,6 +421,7 @@ export class WechatPreviewView extends ItemView {
       this.currentArticle
       && this.currentArticle.sourcePath === snapshot.file.path
       && this.currentArticle.sourceMarkdown === snapshot.markdown
+      && this.currentArticle.themeId === this.plugin.getSelectedThemeId()
     ) {
       return this.currentArticle;
     }
@@ -310,7 +431,11 @@ export class WechatPreviewView extends ItemView {
       window.clearTimeout(this.refreshTimer);
       this.refreshTimer = null;
     }
-    const rendered = await this.renderer.render(snapshot.markdown, snapshot.file);
+    const rendered = await this.renderer.render(
+      snapshot.markdown,
+      snapshot.file,
+      this.plugin.getSelectedThemeId(),
+    );
     if (revision === this.requestedRevision) this.commitRenderedArticle(rendered);
     return rendered;
   }
